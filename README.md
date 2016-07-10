@@ -1,6 +1,7 @@
 # Swagger to Aglio API Documentation
 
 [![Build Status](https://travis-ci.org/psastras/swagger2aglio.svg?branch=master)](https://travis-ci.org/psastras/swagger2aglio)
+[![Coverage Status](https://coveralls.io/repos/github/psastras/swagger2aglio/badge.svg?branch=master)](https://coveralls.io/github/psastras/swagger2aglio?branch=master)
 [![npm version](https://badge.fury.io/js/swagger2aglio.svg)](https://badge.fury.io/js/swagger2aglio)
 [![Dependency Status](https://david-dm.org/psastras/swagger2aglio.svg)](https://david-dm.org/psastras/swagger2aglio)
 [![devDependency Status](https://david-dm.org/psastras/swagger2aglio/dev-status.svg)](https://david-dm.org/psastras/swagger2aglio#info=devDependencies)
