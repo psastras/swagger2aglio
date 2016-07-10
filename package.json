@@ -8,7 +8,7 @@
   "scripts": {
     "cover": "istanbul cover  node_modules/mocha/bin/_mocha",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
-    "examples": "node index.js -s -i petstore_expanded.yml -o examples/default.html && node index.js -s -i petstore_expanded.yml --theme-variables flatly --theme-template triple -o examples/flatly_triple.html",
+    "examples": "node examples.js",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post",
     "start": "node server.js",
     "test": "eslint index.js test.js && mocha"

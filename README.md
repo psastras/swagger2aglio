@@ -18,9 +18,22 @@ Example output is generated from the Swagger Petstore Expanded example
 - [Default two column theme](http://htmlpreview.github.io/?https://raw.githubusercontent.com/psastras/swagger2aglio/blob/master/examples/default.html)
 
   `swagger2aglio -i petstore_expanded.yml -o examples/default.html`
+
+- [Streak two column wide theme](http://htmlpreview.github.io/?https://raw.githubusercontent.com/psastras/swagger2aglio/blob/master/examples/streak_wide.html)
+
+  `swagger2aglio -i petstore_expanded.yml --theme-full-width -o examples/streak_wide.html`
+
+- [Slate two column wide theme](http://htmlpreview.github.io/?https://raw.githubusercontent.com/psastras/swagger2aglio/blob/master/examples/slate_wide.html)
+
+  `swagger2aglio -i petstore_expanded.yml --theme-full-width -o examples/slate_wide.html`
+
 - [Flatly three column theme](http://htmlpreview.github.io/?https://raw.githubusercontent.com/psastras/swagger2aglio/blob/master/examples/flatly_triple.html)
 
-  `swagger2aglio -i petstore_expanded.yml -o examples/default.html --theme-variables flatly --theme-template triple -o examples/flatly_triple.html`
+  `swagger2aglio -i petstore_expanded.yml --theme-variables flatly --theme-template triple -o examples/flatly_triple.html`
+
+- [Slate three column theme](http://htmlpreview.github.io/?https://raw.githubusercontent.com/psastras/swagger2aglio/blob/master/examples/slate_triple.html)
+
+  `swagger2aglio -i petstore_expanded.yml --theme-variables slate --theme-template triple -o examples/slate_triple.html`
 
 ## Installation and Usage
 
