@@ -1,5 +1,5 @@
 var assert = require('assert');
-var swagger2aglio = require('./index');
+var swagger2aglio = require('./../index');
 
 describe('Swagger documentation generator', function () {
 

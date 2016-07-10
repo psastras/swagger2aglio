@@ -6,12 +6,12 @@
     "swagger2aglio": "./index.js"
   },
   "scripts": {
-    "cover": "istanbul cover  node_modules/mocha/bin/_mocha",
+    "cover": "istanbul cover node_modules/mocha/bin/_mocha",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
     "examples": "node examples.js",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post",
     "start": "node server.js",
-    "test": "eslint index.js test.js && mocha"
+    "test": "eslint index.js test/test.js && mocha"
   },
   "repository": {
     "type": "git",
