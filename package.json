@@ -1,0 +1,42 @@
+{
+  "name": "swagger2aglio",
+  "description": "Swagger 2.0 Documentation Generator Using Blueprints Aglio",
+  "main": "index.js",
+  "bin": {
+    "swagger2aglio": "./index.js"
+  },
+  "scripts": {
+    "test": "eslint index.js test.js && mocha",
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/psastras/swagger2aglio.git"
+  },
+  "keywords": [
+    "swagger",
+    "aglio",
+    "api",
+    "apiblueprints",
+    "blueprints",
+    "documentation"
+  ],
+  "author": "Paul Sastrasinh",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/psastras/swagger2aglio/issues"
+  },
+  "homepage": "https://github.com/psastras/swagger2aglio#readme",
+  "dependencies": {
+    "aglio": "^2.2.1",
+    "colors": "^1.1.2",
+    "commander": "^2.9.0",
+    "prettyjson": "1.1.3",
+    "swagger2blueprint": "^1.0.2"
+  },
+  "devDependencies": {
+    "eslint": "^3.0.1",
+    "mocha": "^2.5.3",
+    "semantic-release": "^4.3.5"
+  }
+}
