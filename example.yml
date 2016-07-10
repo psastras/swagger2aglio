@@ -1,0 +1,1288 @@
+swagger: "2.0"
+info: 
+  version: "1.0.0"
+  title: "Speech to Text"
+  description: "###  Service Overview\n The IBM Speech to Text service provides a Representational State Transfer (REST) Application Programming Interface (API) that enables you to add IBM's speech transcription capabilities to your applications. The service also supports an asynchronous HTTP interface for transcribing audio via non-blocking calls. The service transcribes speech from various languages and audio formats to text with low latency. The service supports transcription of the following languages: Brazilian Portuguese, Japanese, Mandarin Chinese, Modern Standard Arabic, Spanish, UK English, and US English. For most languages, the service supports two sampling rates, broadband and narrowband. \n###  API Overview\nThe Speech to Text service provides the following endpoints:\n* `/v1/models` returns information about the models (languages and sampling rates) available for transcription.\n* `/v1/sessions` provides a collection of methods that provide a mechanism for a client to maintain a long, multi-turn exchange, or session, with the service or to establish multiple parallel conversations with a particular instance of the service.\n* `/v1/recognize` (sessionless) includes a single method that provides a simple means of transcribing audio without the overhead of establishing and maintaining a session, but it lacks some of the capabilities available with sessions.\n* `/v1/register_callback` (asynchronous) offers a single method that registers, or white-lists, a callback URL for use with methods of the asynchronous HTTP interface.\n* `/v1/recognitions` (asynchronous) provides a set of non-blocking methods for submitting, querying, and deleting jobs for recognition requests with the asynchronous HTTP interface.\n\n \n###  API Usage\nThe following general information pertains to the transcription of audio:\n* You can pass the audio to be transcribed as a one-shot delivery or in streaming mode. With one-shot delivery, you pass all of the audio data to the service at one time. With streaming mode, you send audio data to the service in chunks over a persistent connection. If your data consists of multiple parts, you must stream the data. To use streaming, you must pass the `Transfer-Encoding` request header with a value of `chunked`. Both forms of data transmission impose a limit of 100 MB of total data for transcription.\n* You can use methods of the session-based, sessionless, or asynchronous HTTP interfaces to pass audio data to the service. All interfaces let you send the data via the body of the request; the session-based and sessionless methods also let you pass data in the form of one or more audio files as multipart form data. With the former approach, you control the transcription via a collection of request headers and query parameters. With the latter, you control the transcription primarily via JSON metadata sent as form data.\n* The service also offers a WebSocket interface as an alternative to its HTTP interfaces. The WebSocket interface supports efficient implementation, lower latency, and higher throughput. The interface establishes a persistent connection with the service, eliminating the need for session-based calls from the HTTP interface.\n* By default, all Watson services log requests and their results. Data is collected only to improve the Watson services. If you do not want to share your data, set the header parameter `X-Watson-Learning-Opt-Out` to `true` for each request. Data is collected for any request that omits this header.\n\nFor more information about using the Speech to Text service and the various interfaces it supports, see <a target=\"_blank\" href=\"http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/doc/speech-to-text/\">Using the Speech to Text service</a>."
+schemes: 
+  - "https"
+host: "watson-api-explorer.mybluemix.net"
+basePath: "/speech-to-text/api"
+paths: 
+  /v1/models: 
+    get: 
+      tags: 
+        - "models"
+      operationId: "GetModels"
+      summary: "Retrieves the models available for the service"
+      description: "Returns a list of all models available for use with the service. The information includes the name of the model, whether it pertains to broadband or narrowband audio, and its minimum sampling rate in Hertz, among other things."
+      produces: 
+        - "application/json"
+      responses: 
+        200: 
+          description: "<b>OK</b>."
+          schema: 
+            $ref: "#/definitions/ModelSet"
+        406: 
+          description: "<b>Not Acceptable</b>."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        415: 
+          description: "<b>Unsupported Media Type</b>."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+  /v1/models/{model_id}: 
+    get: 
+      tags: 
+        - "models"
+      operationId: "getModelId"
+      summary: "Retrieves information about the model"
+      description: "Returns information about a single specified model that is available for use with the service. The information includes the name of the model, whether it pertains to broadband or narrowband audio, and its minimum sampling rate in Hertz, among other things."
+      produces: 
+        - "application/json"
+      parameters: 
+        - 
+          name: "model_id"
+          in: "path"
+          description: "The identifier of the desired model in the form of its `name` from the output of GET `/v1/models`."
+          required: true
+          type: "string"
+          enum: 
+            - "ar-AR_BroadbandModel"
+            - "en-UK_BroadbandModel"
+            - "en-UK_NarrowbandModel"
+            - "en-US_BroadbandModel"
+            - "en-US_NarrowbandModel"
+            - "es-ES_BroadbandModel"
+            - "es-ES_NarrowbandModel"
+            - "fr-FR_BroadbandModel"
+            - "ja-JP_BroadbandModel"
+            - "ja-JP_NarrowbandModel"
+            - "pt-BR_BroadbandModel"
+            - "pt-BR_NarrowbandModel"
+            - "zh-CN_BroadbandModel"
+            - "zh-CN_NarrowbandModel"
+      responses: 
+        200: 
+          description: "<b>OK</b>."
+          schema: 
+            $ref: "#/definitions/Model"
+        404: 
+          description: "<b>Not Found</b>. `Model not found`."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        406: 
+          description: "<b>Not Acceptable</b>."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        415: 
+          description: "<b>Unsupported Media Type</b>."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+  /v1/sessions: 
+    post: 
+      tags: 
+        - "sessions"
+      operationId: "sessions"
+      summary: "Creates a session"
+      description: "Creates a session and locks recognition requests to that engine. You can use the session for multiple recognition requests so that each request is processed with the same Speech to Text engine. Use the cookie that is returned from this operation in the `set-cookie` header for each request that uses this session. \n\nThe session expires after 30 seconds of inactivity. Use a GET request on the `session_id` to prevent the session from expiring."
+      produces: 
+        - "application/json"
+      parameters: 
+        - 
+          name: "model"
+          in: "query"
+          description: "The identifier of the model to be used by the new session (use GET `/v1/models` or GET `/v1/models/{model_id}` for information about available models)."
+          required: false
+          type: "string"
+          enum: 
+            - "ar-AR_BroadbandModel"
+            - "en-UK_BroadbandModel"
+            - "en-UK_NarrowbandModel"
+            - "en-US_BroadbandModel"
+            - "en-US_NarrowbandModel"
+            - "es-ES_BroadbandModel"
+            - "es-ES_NarrowbandModel"
+            - "fr-FR_BroadbandModel"
+            - "ja-JP_BroadbandModel"
+            - "ja-JP_NarrowbandModel"
+            - "pt-BR_BroadbandModel"
+            - "pt-BR_NarrowbandModel"
+            - "zh-CN_BroadbandModel"
+            - "zh-CN_NarrowbandModel"
+          default: "en-US_BroadbandModel"
+        - 
+          name: "body"
+          in: "body"
+          description: "An empty request body: `{}`."
+          required: true
+          schema: 
+            type: "string"
+      responses: 
+        201: 
+          description: "<b>Created</b>."
+          schema: 
+            $ref: "#/definitions/Session"
+        406: 
+          description: "<b>Not Acceptable</b>."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        415: 
+          description: "<b>Unsupported Media Type</b>."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        503: 
+          description: "<b>Service Unavailable</b>."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+  /v1/sessions/{session_id}: 
+    delete: 
+      tags: 
+        - "sessions"
+      operationId: "deleteSession"
+      summary: "Deletes the specified session"
+      description: "Deletes an existing session and its engine. You cannot send requests to a session after it is deleted."
+      parameters: 
+        - 
+          name: "session_id"
+          in: "path"
+          description: "The ID of the session to be deleted."
+          required: true
+          type: "string"
+      responses: 
+        204: 
+          description: "<b>No Content</b>."
+        400: 
+          description: "<b>Bad Request</b>. `Cookie must be set`."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        404: 
+          description: "<b>Not Found</b>. `'session_id' not found`."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        406: 
+          description: "<b>Not Acceptable</b>."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+  /v1/sessions/{session_id}/observe_result: 
+    get: 
+      tags: 
+        - "sessions"
+      operationId: "observeResult"
+      summary: "Observes results for a recognition task within a session"
+      description: "Requests results for a recognition task within the specified session. You can submit multiple requests for the same recognition task. To see interim results, set the query parameter `interim_results=true`. \n\nSpecify a sequence ID (with the `sequence_id` query parameter) that matches the sequence ID of a recognition request to see results for that recognition task. A request with a sequence ID can arrive before, during, or after the matching recognition request, but it must arrive no later than 30 seconds after the recognition completes to avoid a session timeout (status code 408). Send multiple requests for the sequence ID with a maximum gap of 30 seconds to avoid the timeout. Omit the sequence ID to observe results for an ongoing recognition task; if no recognition is ongoing, the method returns results for the next recognition task regardless of whether it specifies a sequence ID."
+      produces: 
+        - "application/json"
+      parameters: 
+        - 
+          name: "session_id"
+          in: "path"
+          description: "The ID of the session whose results you want to observe."
+          required: true
+          type: "string"
+        - 
+          name: "sequence_id"
+          in: "query"
+          description: "The sequence ID of the recognition task whose results you want to observe. Omit the parameter to obtain results either for an ongoing recognition, if any, or for the next recognition task regardless of whether it specifies a sequence ID."
+          required: false
+          type: "integer"
+        - 
+          name: "interim_results"
+          in: "query"
+          description: "If `true`, interim results are returned as a stream of JSON objects; each object represents a single `SpeechRecognitionEvent`. If `false`, the response is a single `SpeechRecognitionEvent` with final results only."
+          required: false
+          type: "boolean"
+          default: false
+      responses: 
+        200: 
+          description: "<b>OK</b>."
+          schema: 
+            $ref: "#/definitions/SpeechRecognitionEvent"
+        400: 
+          description: "<b>Bad Request</b>. User input error (for example, audio not matching the specified format) or an inactivity timeout occurred. If an existing session is closed, `session_closed` is set to `true`."
+          schema: 
+            $ref: "#/definitions/ErrorSession"
+        404: 
+          description: "<b>Not Found</b>. `The 'session_id' was not found` or `A specified sequence_id does not match the sequence ID of the recognition task`."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        406: 
+          description: "<b>Not Acceptable</b>."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        408: 
+          description: "<b>Request Timeout</b>. `Session closed due to inactivity` (session timeout) for 30 seconds. `session_closed` is set to `true`."
+          schema: 
+            $ref: "#/definitions/ErrorSession"
+        413: 
+          description: "<b>Payload Too Large</b>. `Session closed because the input stream is larger than currently supported data limit`. `session_closed` is set to `true`."
+          schema: 
+            $ref: "#/definitions/ErrorSession"
+        415: 
+          description: "<b>Unsupported Media Type</b>."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        500: 
+          description: "<b>Internal server error</b>. The session is destroyed with `session_closed` set to `true`. Future requests that use this session return HTTP response code 404."
+          schema: 
+            $ref: "#/definitions/ErrorSession"
+  /v1/sessions/{session_id}/recognize: 
+    get: 
+      tags: 
+        - "sessions"
+      operationId: "recognizeSessionGet"
+      summary: "Checks whether a session is ready to accept a new recognition task"
+      description: "Provides a way to check whether the specified session can accept another recognition request. Concurrent recognition tasks during the same session are not allowed. The returned state must be `initialized` to indicate that you can send another recognition request with the POST `recognize` method."
+      produces: 
+        - "application/json"
+      parameters: 
+        - 
+          name: "session_id"
+          in: "path"
+          description: "The ID of the session for the recognition task."
+          required: true
+          type: "string"
+      responses: 
+        200: 
+          description: "<b>OK</b>."
+          schema: 
+            $ref: "#/definitions/RecognizeStatus"
+        404: 
+          description: "<b>Not Found</b>. `'session_id' not found`."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        406: 
+          description: "<b>Not Acceptable</b>."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        415: 
+          description: "<b>Unsupported Media Type</b>."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+    post: 
+      tags: 
+        - "sessions"
+      operationId: "recognizeSession"
+      summary: "Sends audio for speech recognition within a session"
+      description: "Sends audio and returns transcription results for a session-based recognition request. By default, returns only the final results; to see interim results, set the query parameter `interim_results=true` in a `GET` request to the `observe_result` method before this `POST` request finishes. To enable polling by the `observe_result` method for large audio requests, specify an integer with the `sequence_id` query parameter for non-multipart requests or with the `sequence_id` parameter of the JSON metadata for multipart requests. The service imposes a data size limit of 100 MB per session. It automatically detects the endianness of the incoming audio and, for audio that includes multiple channels, downmixes the audio to one-channel mono during transcoding. \n\n### Streaming mode\n\n For requests to transcribe audio with more than one audio file (multipart requests) or to transcribe live audio as it becomes available, you must set `Transfer-Encoding` to `chunked` to use streaming mode. In streaming mode, the server closes the session (status code 408) if the service receives no data chunk for 30 seconds and the service has no audio to transcribe for 30 seconds. The server also closes the session (status code 400) if no speech is detected for `inactivity_timeout` seconds of audio (not processing time); use the `inactivity_timeout` parameter to change the default of 30 seconds. \n\n### Non-multipart requests\n\n For non-multipart requests, you specify all parameters of the request as a path parameter, request headers, and query parameters. You provide the audio as the body of the request. Use the following parameters:\n* <b>Required:</b> `session_id`, `Content-Type`, and `body`\n* <b>Optional:</b> `Transfer-Encoding`, `sequence_id`, `continuous`, `inactivity_timeout`, `keywords`, `keywords_threshold`, `max_alternatives`, `word_alternatives_threshold`, `word_confidence`, `timestamps`, `profanity_filter`, and `smart_formatting`\n\n \n\n### Multipart requests\n\n For multipart requests, you specify a few parameters of the request via a path parameter and as request headers, but you specify most parameters as multipart form data in the form of JSON metadata, in which only `part_content_type` is required. You then specify the audio files for the request as subsequent parts of the form data. Use the following parameters:\n* <b>Required:</b> `session_id`, `Content-Type`, `metadata`, and `multipart`\n* <b>Optional:</b> `Transfer-Encoding`\n\nAn example of the multipart metadata for the first part of a series of FLAC files follows. This first part of the request is sent as JSON. The remaining parts are one or more audio files (the example sends only a single audio file). <pre><code>metadata=\"{\"part_content_type\":\"audio/flac\",\"data_parts_count\":1,\"continuous\":true,\"inactivity_timeout\":-1}\"</code></pre>"
+      consumes: 
+        - "audio/flac"
+        - "audio/l16"
+        - "audio/wav"
+        - "audio/basic"
+        - "audio/ogg;codecs=opus"
+      produces: 
+        - "application/json"
+      parameters: 
+        - 
+          name: "session_id"
+          in: "path"
+          description: "The ID of the session for the recognition task."
+          required: true
+          type: "string"
+        - 
+          name: "Content-Type"
+          in: "header"
+          description: "<u>Non-multipart:</u> Must be one of the `audio/` MIME types to indicate the media type of the audio. If you use the `audio/l16` type, specify the rate and channels; for example, `audio/l16; rate=48000; channels=2`. Ensure that the rate matches the rate at which the audio is captured and specify a maximum of 16 channels. If you use the `audio/wav` type, provide audio with a maximum of nine channels. If you use the `audio/basic` type, you must use a narrowband model. \n\n<u>Multipart:</u> Must be `multipart/form-data` to indicate the content type of the payload."
+          required: true
+          type: "string"
+          enum: 
+            - "audio/flac"
+            - "audio/l16"
+            - "audio/wav"
+            - "audio/basic"
+            - "audio/ogg;codecs=opus"
+            - "multipart/form-data"
+        - 
+          name: "Transfer-Encoding"
+          in: "header"
+          description: "Set to `chunked` to send the audio in streaming mode. \n\n<u>Multipart:</u> You must also set this header for requests with more than one audio part."
+          required: false
+          type: "string"
+          enum: 
+            - "chunked"
+        - 
+          name: "body"
+          in: "body"
+          description: "<u>Non-multipart only:</u> Audio to transcribe in the format specified by the `Content-Type` header. <b>Required for a non-multipart request.</b>"
+          required: false
+          schema: 
+            type: "array"
+            items: 
+              type: "string"
+              format: "byte"
+        - 
+          name: "sequence_id"
+          in: "query"
+          description: "<u>Non-multipart only:</u> Sequence ID of this recognition task in the form of a user-specified integer. If omitted, no sequence ID is associated with the recognition task."
+          required: false
+          type: "integer"
+        - 
+          name: "continuous"
+          in: "query"
+          description: "<u>Non-multipart only:</u> If `true`, multiple final results representing consecutive phrases separated by long pauses are returned. Otherwise, recognition ends after the first \"end of speech\" incident is detected."
+          required: false
+          type: "boolean"
+          default: false
+        - 
+          name: "inactivity_timeout"
+          in: "query"
+          description: "<u>Non-multipart only:</u> The time in seconds after which, if only silence (no speech) is detected in submitted audio, the connection is closed with a 400 error and with `session_closed` set to `true`. Useful for stopping audio submission from a live microphone when a user simply walks away.  Use `-1` for infinity. See also the `continuous` parameter."
+          required: false
+          type: "integer"
+          format: "int32"
+          default: 30
+        - 
+          name: "keywords"
+          in: "query"
+          description: "<u>Non-multipart only:</u> Array of keyword strings to spot in the audio. Each keyword string can include one or more tokens. Keywords are spotted only in the final hypothesis, not in interim results. Omit the parameter or specify an empty array if you do not need to spot keywords."
+          required: false
+          type: "array"
+          items: 
+            type: "string"
+        - 
+          name: "keywords_threshold"
+          in: "query"
+          description: "<u>Non-multipart only:</u> Confidence value that is the lower bound for spotting a keyword. A word is considered to match a keyword if its confidence is greater than or equal to the threshold. Specify a probability between 0 and 1 inclusive. No keyword spotting is performed if the default value (null) is used. If you specify a threshold, you must also specify one or more keywords."
+          required: false
+          type: "number"
+          format: "float"
+        - 
+          name: "max_alternatives"
+          in: "query"
+          description: "<u>Non-multipart only:</u> Maximum number of alternative transcripts to be returned. By default, a single transcription is returned."
+          required: false
+          type: "integer"
+          format: "int32"
+          default: 1
+        - 
+          name: "word_alternatives_threshold"
+          in: "query"
+          description: "<u>Non-multipart only:</u> Confidence value that is the lower bound for identifying a hypothesis as a possible word alternative (also known as \"Confusion Networks\"). An alternative word is considered if its confidence is greater than or equal to the threshold. Specify a probability between 0 and 1 inclusive. No alternative words are computed if the default value (null) is used."
+          required: false
+          type: "number"
+          format: "float"
+        - 
+          name: "word_confidence"
+          in: "query"
+          description: "<u>Non-multipart only:</u> If `true`, confidence measure per word is returned."
+          required: false
+          type: "boolean"
+          default: false
+        - 
+          name: "timestamps"
+          in: "query"
+          description: "<u>Non-multipart only:</u> If `true`, time alignment for each word is returned."
+          required: false
+          type: "boolean"
+          default: false
+        - 
+          name: "profanity_filter"
+          in: "query"
+          description: "<u>Non-multipart only:</u> If `true` (the default), filters profanity from all output except for keyword results by replacing inappropriate words with a series of asterisks. Set the parameter to `false` to return results with no censoring. Applies to US English transcription only."
+          required: false
+          type: "boolean"
+          default: true
+        - 
+          name: "smart_formatting"
+          in: "query"
+          description: "<u>Non-multipart only:</u> If `true`, converts dates, times, series of digits and numbers, phone numbers, currency values, and Internet addresses into more readable, conventional representations in the final transcript of a recognition request. If `false` (the default), no formatting is performed. Applies to US English transcription only."
+          required: false
+          type: "boolean"
+          default: false
+        - 
+          name: "metadata"
+          in: "formData"
+          description: "<u>Multipart only:</u> Metadata for the request. This must be the first part of the request and must consist of JSON-formatted text. The metadata describes the following parts of the request, which contain the audio data. The `Content-Type` of the parts is ignored. <b>Required for a multipart request.</b>"
+          required: false
+          schema: 
+            $ref: "#/definitions/Metadata"
+        - 
+          name: "upload"
+          in: "formData"
+          description: "<u>Multipart only:</u> One or more audio files for the request. For multiple audio files, set `Transfer-Encoding` to `chunked`. <b>Required for a multipart request.</b>"
+          required: false
+          type: "file"
+          collectionFormat: "multi"
+      responses: 
+        200: 
+          description: "<b>OK</b>."
+          schema: 
+            $ref: "#/definitions/SpeechRecognitionEvent"
+        400: 
+          description: "<b>Bad Request</b>. User input error (for example, audio not matching the specified format), the session is in the wrong state, or an inactivity timeout occurred. If an existing session is closed, `session_closed` is set to `true`."
+          schema: 
+            $ref: "#/definitions/ErrorSession"
+        404: 
+          description: "<b>Not Found</b>. `'session_id' not found`."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        406: 
+          description: "<b>Not Acceptable</b>."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        408: 
+          description: "<b>Request Timeout</b>. `Session closed due to inactivity` (session timeout) for 30 seconds. `session_closed` is set to `true`."
+          schema: 
+            $ref: "#/definitions/ErrorSession"
+        413: 
+          description: "<b>Payload Too Large</b>. `Session closed because the input stream is larger than 100 MB`. `session_closed` is set to `true`."
+          schema: 
+            $ref: "#/definitions/ErrorSession"
+        415: 
+          description: "<b>Unsupported Media Type</b>."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        500: 
+          description: "<b>Internal Server Error</b>. The session is destroyed with `session_closed` set to `true`. Future requests that use this session return HTTP response code 404."
+          schema: 
+            $ref: "#/definitions/ErrorSession"
+        503: 
+          description: "<b>Service Unavailable</b>. `Session is already processing a request`. Concurrent requests are not allowed on the same session. Session remains alive after this error."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+  /v1/recognize: 
+    post: 
+      tags: 
+        - "sessionless"
+      operationId: "recognizeSessionless"
+      summary: "Sends audio for speech recognition in sessionless mode"
+      description: "Sends audio and returns transcription results for a sessionless recognition request. Returns only the final results; to enable interim results, use session-based requests or the WebSocket API. The service imposes a data size limit of 100 MB. It automatically detects the endianness of the incoming audio and, for audio that includes multiple channels, downmixes the audio to one-channel mono during transcoding. \n\n### Streaming mode\n\n For requests to transcribe audio with more than one audio file (multipart requests) or to transcribe live audio as it becomes available, you must set the `Transfer-Encoding` header to `chunked` to use streaming mode. In streaming mode, the server closes the connection (status code 408) if the service receives no data chunk for 30 seconds and the service has no audio to transcribe for 30 seconds. The server also closes the connection (status code 400) if no speech is detected for `inactivity_timeout` seconds of audio (not processing time); use the `inactivity_timeout` parameter to change the default of 30 seconds. \n\n### Non-multipart requests\n\n For non-multipart requests, you specify all parameters of the request as a collection of request headers and query parameters, and you provide the audio as the body of the request. Use the following parameters:\n* <b>Required:</b> `Content-Type` and `body`\n* <b>Optional:</b> `Transfer-Encoding`, `model`, `continuous`, `inactivity_timeout`, `keywords`, `keywords_threshold`, `max_alternatives`, `word_alternatives_threshold`, `word_confidence`, `timestamps`, `profanity_filter`, and `smart_formatting`\n\n \n\n### Multipart requests\n\n For multipart requests, you specify a few parameters of the request as request headers and a query parameter, but you specify most parameters as multipart form data in the form of JSON metadata, in which only `part_content_type` is required. You then specify the audio files for the request as subsequent parts of the form data. Use the following parameters:\n* <b>Required:</b> `Content-Type`, `metadata`, and `multipart`\n* <b>Optional:</b> `Transfer-Encoding` and `model`\n\nAn example of the multipart metadata for the first part of a series of FLAC files follows. This first part of the request is sent as JSON. The remaining parts are one or more audio files (the example sends only a single audio file). <pre><code>metadata=\"{\"part_content_type\":\"audio/flac\",\"data_parts_count\":1,\"continuous\":true,\"inactivity_timeout\"=-1}\"</code></pre>"
+      consumes: 
+        - "audio/flac"
+        - "audio/l16"
+        - "audio/wav"
+        - "audio/basic"
+        - "audio/ogg;codecs=opus"
+      produces: 
+        - "application/json"
+      parameters: 
+        - 
+          name: "Content-Type"
+          in: "header"
+          description: "<u>Non-multipart:</u> Must be one of the `audio/` MIME types to indicate the media type of the audio. If you use the `audio/l16` type, specify the rate and channels; for example, `audio/l16; rate=48000; channels=2`. Ensure that the rate matches the rate at which the audio is captured and specify a maximum of 16 channels. If you use the `audio/wav` type, provide audio with a maximum of nine channels. If you use the `audio/basic` type, you must use a narrowband model. \n\n<u>Multipart:</u> Must be `multipart/form-data` to indicate the content type of the payload."
+          required: true
+          type: "string"
+          enum: 
+            - "audio/flac"
+            - "audio/l16"
+            - "audio/wav"
+            - "audio/basic"
+            - "audio/ogg;codecs=opus"
+            - "multipart/form-data"
+        - 
+          name: "Transfer-Encoding"
+          in: "header"
+          description: "Set to `chunked` to send the audio in streaming mode. \n\n<u>Multipart:</u> You must also set this header for requests with more than one audio part."
+          required: false
+          type: "string"
+          enum: 
+            - "chunked"
+        - 
+          name: "model"
+          in: "query"
+          description: "The identifier of the model to be used for the recognition request (use GET `/v1/models` for a list of available models)."
+          required: false
+          type: "string"
+          enum: 
+            - "ar-AR_BroadbandModel"
+            - "en-UK_BroadbandModel"
+            - "en-UK_NarrowbandModel"
+            - "en-US_BroadbandModel"
+            - "en-US_NarrowbandModel"
+            - "es-ES_BroadbandModel"
+            - "es-ES_NarrowbandModel"
+            - "fr-FR_BroadbandModel"
+            - "ja-JP_BroadbandModel"
+            - "ja-JP_NarrowbandModel"
+            - "pt-BR_BroadbandModel"
+            - "pt-BR_NarrowbandModel"
+            - "zh-CN_BroadbandModel"
+            - "zh-CN_NarrowbandModel"
+          default: "en-US_BroadbandModel"
+        - 
+          name: "body"
+          in: "body"
+          description: "<u>Non-multipart only:</u> Audio to transcribe in the format specified by the `Content-Type` header. <b>Required for a non-multipart request.</b>"
+          required: false
+          schema: 
+            type: "array"
+            items: 
+              type: "string"
+              format: "byte"
+        - 
+          name: "continuous"
+          in: "query"
+          description: "<u>Non-multipart only:</u> If `true`, multiple final results that represent consecutive phrases separated by pauses are returned. Otherwise, recognition ends after the first \"end of speech\" incident is detected."
+          required: false
+          type: "boolean"
+          default: false
+        - 
+          name: "inactivity_timeout"
+          in: "query"
+          description: "<u>Non-multipart only:</u> The time in seconds after which, if only silence (no speech) is detected in submitted audio, the connection is closed with a 400 error. Useful for stopping audio submission from a live microphone when a user simply walks away. Use `-1` for infinity. See also the `continuous` parameter."
+          required: false
+          type: "integer"
+          format: "int32"
+          default: 30
+        - 
+          name: "keywords"
+          in: "query"
+          description: "<u>Non-multipart only:</u> Array of keyword strings to spot in the audio. Each keyword string can include one or more tokens. Keywords are spotted only in the final hypothesis, not in interim results. Omit the parameter or specify an empty array if you do not need to spot keywords."
+          required: false
+          type: "array"
+          items: 
+            type: "string"
+        - 
+          name: "keywords_threshold"
+          in: "query"
+          description: "<u>Non-multipart only:</u> Confidence value that is the lower bound for spotting a keyword. A word is considered to match a keyword if its confidence is greater than or equal to the threshold. Specify a probability between 0 and 1 inclusive. No keyword spotting is performed if the default value (null) is used. If you specify a threshold, you must also specify one or more keywords."
+          required: false
+          type: "number"
+          format: "float"
+        - 
+          name: "max_alternatives"
+          in: "query"
+          description: "<u>Non-multipart only:</u> Maximum number of alternative transcripts to be returned. By default, a single transcription is returned."
+          required: false
+          type: "integer"
+          format: "int32"
+          default: 1
+        - 
+          name: "word_alternatives_threshold"
+          in: "query"
+          description: "<u>Non-multipart only:</u> Confidence value that is the lower bound for identifying a hypothesis as a possible word alternative (also known as \"Confusion Networks\"). An alternative word is considered if its confidence is greater than or equal to the threshold. Specify a probability between 0 and 1 inclusive. No alternative words are computed if the default value (null) is used."
+          required: false
+          type: "number"
+          format: "float"
+        - 
+          name: "word_confidence"
+          in: "query"
+          description: "<u>Non-multipart only:</u> If `true`, confidence measure per word is returned."
+          required: false
+          type: "boolean"
+          default: false
+        - 
+          name: "timestamps"
+          in: "query"
+          description: "<u>Non-multipart only:</u> If `true`, time alignment for each word is returned."
+          required: false
+          type: "boolean"
+          default: false
+        - 
+          name: "profanity_filter"
+          in: "query"
+          description: "<u>Non-multipart only:</u> If `true` (the default), filters profanity from all output except for keyword results by replacing inappropriate words with a series of asterisks. Set the parameter to `false` to return results with no censoring. Applies to US English transcription only."
+          required: false
+          type: "boolean"
+          default: true
+        - 
+          name: "smart_formatting"
+          in: "query"
+          description: "<u>Non-multipart only:</u> If `true`, converts dates, times, series of digits and numbers, phone numbers, currency values, and Internet addresses into more readable, conventional representations in the final transcript of a recognition request. If `false` (the default), no formatting is performed. Applies to US English transcription only."
+          required: false
+          type: "boolean"
+          default: false
+        - 
+          name: "metadata"
+          in: "formData"
+          description: "<u>Multipart only:</u> Metadata for the request. This must be the first part of the request and must consist of JSON-formatted text. The metadata describes the following parts of the request, which contain the data. The `Content-Type` of the parts is ignored. <b>Required for a multipart request.</b>"
+          required: false
+          schema: 
+            $ref: "#/definitions/Metadata"
+        - 
+          name: "upload"
+          in: "formData"
+          description: "<u>Multipart only:</u> One or more audio files for the request. For multiple audio files, set `Transfer-Encoding` to `chunked`. <b>Required for a multipart request.</b>"
+          required: false
+          type: "file"
+          collectionFormat: "multi"
+      responses: 
+        200: 
+          description: "<b>OK</b>."
+          schema: 
+            $ref: "#/definitions/SpeechRecognitionEvent"
+        400: 
+          description: "<b>Bad Request</b>. `User input error` (for example, audio not matching the specified format) or `Inactivity timeout` (no speech detected)."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        406: 
+          description: "<b>Not Acceptable</b>."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        408: 
+          description: "<b>Request Timeout</b>. `Request failed due to inactivity` (no audio data sent) for 30 seconds."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        413: 
+          description: "<b>Payload Too Large</b>. `Request failed because the input stream is larger than 100 MB`."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        415: 
+          description: "<b>Unsupported Media Type</b>."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        500: 
+          description: "<b>Internal Server Error</b>."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        503: 
+          description: "<b>Service Unavailable</b>."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+  /v1/register_callback: 
+    post: 
+      tags: 
+        - "asynchronous"
+      operationId: "registerCallback"
+      summary: "Registers a callback URL for use with the asynchronous interface"
+      description: "Registers a callback URL with the service for use with subsequent asynchronous recognition requests. The service attempts to register, or white-list, the callback URL. To be registered successfully, the callback URL must respond to a `GET` request from the service, after which the service responds with response code 201 to the original registration request. \n\n The service sends only a single `GET` request to the callback URL. If the service does not receive a response with a response code of 200 and a body that echoes a random alphanumeric challenge string from the service within 5 seconds, it does not white-list the URL; it sends response code 400 in response to the registration request. If the requested callback URL is already white-listed, the service responds to the registration request with response code 200. \n\nOnce you successfully register a callback URL, you can use it with an indefinite number of recognition requests. You can register a maximum of 20 callback URLS in a one-hour span of time. \n\nIf you specify a user secret with the request, the service uses it as a key to calculate an HMAC-SHA1 signature of a random challenge string in its response to the request. It sends the signature in the `X-Callback-Signature` header of its `GET` request to the URL during registration. It also uses the secret to calculate a signature over the payload of every callback notification that uses the URL. The signature provides authentication and data integrity for HTTP communications. \n\n<b>Note:</b> This method is currently a beta release that supports US English only."
+      produces: 
+        - "application/json"
+      parameters: 
+        - 
+          name: "callback_url"
+          in: "query"
+          description: "An HTTP or HTTPS URL to which callback notifications are to be sent. To be white-listed, the URL must successfully echo the challenge string during URL verification. During verification, the client can also check the signature that the service sends in the `X-Callback-Signature` header to verify the origin of the request."
+          required: true
+          type: "string"
+        - 
+          name: "user_secret"
+          in: "query"
+          description: "A user-specified string that the service uses to generate the HMAC-SHA1 signature that it sends via the `X-Callback-Signature` header. The service includes the header during URL verification and with every notification sent to the callback URL. It calculates the signature over the payload of the notification. If you omit the parameter, the service does not send the header."
+          required: false
+          type: "string"
+        - 
+          name: "body"
+          in: "body"
+          description: "An empty request body: `{}`."
+          required: true
+          schema: 
+            type: "string"
+      responses: 
+        200: 
+          description: "<b>OK</b>. The callback was already registered (white-listed). The status included in the response is `already created`."
+          schema: 
+            $ref: "#/definitions/RegisterStatus"
+        201: 
+          description: "<b>Created</b>. The callback was successfully registered (white-listed). The status included in the response is `created`."
+          schema: 
+            $ref: "#/definitions/RegisterStatus"
+        400: 
+          description: "<b>Bad Request</b>. The callback registration failed. The request was missing a required parameter or specified an invalid argument; the client sent an invalid response to the service's `GET` request during the registration process; or the client failed to respond to the server's request before the five-second timeout."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        503: 
+          description: "<b>Service Unavailable</b>. The service is currently unavailable."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+  /v1/recognitions: 
+    get: 
+      tags: 
+        - "asynchronous"
+      operationId: "checkJobs"
+      summary: "Checks the status of all asynchronous jobs"
+      description: "Returns the status and ID of all outstanding jobs associated with the service credentials with which it is called. If a job was created with a callback URL and a user token, the method also returns the user token for the job. To obtain the results for a job whose status is `completed`, use the `GET recognitions/{id}` method. A job and its results remain available until you delete them with the `DELETE recognitions/{id}` method or until the job's time to live expires, whichever comes first. \n\n<b>Note:</b> This method is currently a beta release that supports US English only."
+      produces: 
+        - "application/json"
+      responses: 
+        200: 
+          description: "<b>OK</b>."
+          schema: 
+            $ref: "#/definitions/JobsStatusList"
+        503: 
+          description: "<b>Service Unavailable</b>. The service is currently unavailable."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+    post: 
+      tags: 
+        - "asynchronous"
+      operationId: "createJob"
+      summary: "Creates a job for an asynchronous recognition request"
+      description: "Creates a job for a new asynchronous recognition request. The job is owned by the user whose service credentials are used to create it. How you learn the status and results of a job depends on the parameters you include with the job creation request:\n* By callback notification: Include the `callback_url` query parameter to specify a URL to which the service is to send callback notifications when the status of the job changes. Optionally, you can also include the `events` and `user_token` query parameters to subscribe to specific events and to specify a string that is to be included with each notification for the job.\n* By polling the service: Omit the `callback_url`, `events`, and `user_token` query parameters. You must then use the `GET recognitions` or `GET recognitions/{id}` methods to check the status of the job, using the latter to retrieve the results when the job is complete.\n\nThe two approaches are not mutually exclusive. You can poll the service for job status or obtain results from the service manually even if you include a callback URL. In both cases, you can include the `results_ttl` parameter to specify how long the results are to remain available after the job is complete. Note that using the HTTPS `GET recognitions/{id}` method to retrieve results is more secure than receiving them via callback notification over HTTP because it provides confidentiality in addition to authentication and data integrity. \n\nThe method supports the same basic parameters as all HTTP REST and WebSocket recognition requests; it does not support interim results or multipart data. The service imposes a data size limit of 100 MB. It automatically detects the endianness of the incoming audio and, for audio that includes multiple channels, downmixes the audio to one-channel mono during transcoding. \n\n<b>Note:</b> This method is currently a beta release that supports US English only."
+      consumes: 
+        - "audio/flac"
+        - "audio/l16"
+        - "audio/wav"
+        - "audio/basic"
+        - "audio/ogg;codecs=opus"
+      produces: 
+        - "application/json"
+      parameters: 
+        - 
+          name: "callback_url"
+          in: "query"
+          description: "A URL to which callback notifications are to be sent. The URL must already be successfully white-listed by using the `POST register_callback` method. Omit the parameter to poll the service for job completion and results. You can include the same callback URL with any number of job creation requests. Use the `user_token` query parameter to specify a unique user-specified string with each job to differentiate the callback notifications for the jobs."
+          required: false
+          type: "string"
+        - 
+          name: "events"
+          in: "query"
+          description: "If the job includes a callback URL, a comma-separated list of notification events to which to subscribe. Valid events are: `recognitions.started` generates a callback notification when the service begins to process the job. `recognitions.completed` generates a callback notification when the job is complete; you must use the `GET recognitions/{id}` method to retrieve the results before they time out or are deleted. `recognitions.completed_with_results` generates a callback notification when the job is complete; the notification includes the results of the request. `recognitions.failed` generates a callback notification if the service experiences an error while processing the job. Omit the parameter to subscribe to the default events: `recognitions.started`, `recognitions.completed`, and `recognitions.failed`. The `recognitions.completed` and `recognitions.completed_with_results` events are incompatible; you can specify only of the two events. If the job does not include a callback URL, omit the parameter."
+          required: false
+          type: "string"
+          enum: 
+            - "recognitions.started"
+            - "recognitions.completed"
+            - "recognitions.completed_with_results"
+            - "recognitions.failed"
+        - 
+          name: "user_token"
+          in: "query"
+          description: "If the job includes a callback URL, a user-specified string that the service is to include with each callback notification for the job; the token allows the user to maintain an internal mapping between jobs and notification events. If the job does not include a callback URL, omit the parameter."
+          required: false
+          type: "string"
+        - 
+          name: "results_ttl"
+          in: "query"
+          description: "The number of minutes for which the results are to be available after the job has finished. If not delivered via a callback, the results must be retrieved within this time. Omit the parameter to use a time to live of one week. The parameter is valid with or without a callback URL."
+          required: false
+          type: "integer"
+        - 
+          name: "Content-Type"
+          in: "header"
+          description: "The MIME type of the audio. If you use the `audio/l16` type, specify the rate and channels; for example, `audio/l16; rate=48000; channels=2`. Ensure that the rate matches the rate at which the audio is captured and specify a maximum of 16 channels. If you use the `audio/wav` type, provide audio with a maximum of nine channels. If you use the `audio/basic` type, you must use a narrowband model."
+          required: true
+          type: "string"
+          enum: 
+            - "audio/flac"
+            - "audio/l16"
+            - "audio/wav"
+            - "audio/basic"
+            - "audio/ogg;codecs=opus"
+        - 
+          name: "Transfer-Encoding"
+          in: "header"
+          description: "Set to `chunked` to send the audio in streaming mode."
+          required: false
+          type: "string"
+          enum: 
+            - "chunked"
+        - 
+          name: "body"
+          in: "body"
+          description: "Audio to transcribe in the format specified by the `Content-Type` header."
+          required: true
+          schema: 
+            type: "array"
+            items: 
+              type: "string"
+              format: "byte"
+        - 
+          name: "model"
+          in: "query"
+          description: "The identifier of the model to be used for the recognition request. Currently, only `en-US-BroadbandModel` (the default) is supported."
+          required: false
+          type: "string"
+          enum: 
+            - "en-US_BroadbandModel"
+          default: "en-US_BroadbandModel"
+        - 
+          name: "continuous"
+          in: "query"
+          description: "If `true`, multiple final results that represent consecutive phrases separated by pauses are returned. Otherwise, recognition ends after the first \"end of speech\" incident is detected."
+          required: false
+          type: "boolean"
+          default: false
+        - 
+          name: "inactivity_timeout"
+          in: "query"
+          description: "The time in seconds after which, if only silence (no speech) is detected in submitted audio, the connection is closed with a 400 error. Useful for stopping audio submission from a live microphone when a user simply walks away. Use `-1` for infinity. See also the `continuous` parameter."
+          required: false
+          type: "integer"
+          format: "int32"
+          default: 30
+        - 
+          name: "keywords"
+          in: "query"
+          description: "Array of keyword strings to spot in the audio. Each keyword string can include one or more tokens. Keywords are spotted only in the final hypothesis, not in interim results. Omit the parameter or specify an empty array if you do not need to spot keywords."
+          required: false
+          type: "array"
+          items: 
+            type: "string"
+        - 
+          name: "keywords_threshold"
+          in: "query"
+          description: "Confidence value that is the lower bound for spotting a keyword. A word is considered to match a keyword if its confidence is greater than or equal to the threshold. Specify a probability between 0 and 1 inclusive. No keyword spotting is performed if the default value (null) is used. If you specify a threshold, you must also specify one or more keywords."
+          required: false
+          type: "number"
+          format: "float"
+        - 
+          name: "max_alternatives"
+          in: "query"
+          description: "Maximum number of alternative transcripts to be returned. By default, a single transcription is returned."
+          required: false
+          type: "integer"
+          format: "int32"
+          default: 1
+        - 
+          name: "word_alternatives_threshold"
+          in: "query"
+          description: "Confidence value that is the lower bound for identifying a hypothesis as a possible word alternative (also known as \"Confusion Networks\"). An alternative word is considered if its confidence is greater than or equal to the threshold. Specify a probability between 0 and 1 inclusive. No alternative words are computed if the default value (null) is used."
+          required: false
+          type: "number"
+          format: "float"
+        - 
+          name: "word_confidence"
+          in: "query"
+          description: "If `true`, confidence measure per word is returned."
+          required: false
+          type: "boolean"
+          default: false
+        - 
+          name: "timestamps"
+          in: "query"
+          description: "If `true`, time alignment for each word is returned."
+          required: false
+          type: "boolean"
+          default: false
+        - 
+          name: "profanity_filter"
+          in: "query"
+          description: "If `true` (the default), filters profanity from all output except for keyword results by replacing inappropriate words with a series of asterisks. Set the parameter to `false` to return results with no censoring. Applies to US English transcription only."
+          required: false
+          type: "boolean"
+          default: true
+        - 
+          name: "smart_formatting"
+          in: "query"
+          description: "If `true`, converts dates, times, series of digits and numbers, phone numbers, currency values, and Internet addresses into more readable, conventional representations in the final transcript of a recognition request. If `false` (the default), no formatting is performed. Applies to US English transcription only."
+          required: false
+          type: "boolean"
+          default: false
+      responses: 
+        201: 
+          description: "<b>Created</b>. The job was successfully created."
+          schema: 
+            $ref: "#/definitions/JobsStatus"
+        400: 
+          description: "<b>Bad Request</b>. The request specified an invalid argument. For example, the request specified a callback URL that has not been white-listed, the `events` or `user_token` parameter without also specifying a callback URL, or both the `recognitions.completed` and `recognitions.completed_with_results` events."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        503: 
+          description: "<b>Service Unavailable</b>. The service is currently unavailable."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+  /v1/recognitions/{id}: 
+    delete: 
+      tags: 
+        - "asynchronous"
+      operationId: "deleteJob"
+      summary: "Deletes the specified asynchronous job"
+      description: "Deletes the specified job regardless of its current state. If you delete an active job, the service cancels the job without producing results. Once you delete a job, its results are no longer available. The service automatically deletes a job and its results when the time to live for the results expires. You must submit the request with the service credentials of the user who created the job. \n\n<b>Note:</b> This method is currently a beta release that supports US English only."
+      parameters: 
+        - 
+          name: "id"
+          in: "path"
+          description: "The ID of the job that is to be deleted."
+          required: true
+          type: "string"
+      responses: 
+        204: 
+          description: "<b>No Content</b>. The job was successfully deleted."
+        404: 
+          description: "<b>Not Found</b>. The specified job ID was not found."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        503: 
+          description: "<b>Service Unavailable</b>. The service is currently unavailable."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+    get: 
+      tags: 
+        - "asynchronous"
+      operationId: "checkJob"
+      summary: "Checks the status of the specified asynchronous job"
+      description: "Returns information about the specified job. The response always includes the status of the job. If the status is `completed`, the response includes the results of the recognition request; otherwise, the response includes the job ID. You must submit the request with the service credentials of the user who created the job. \n\nYou can use the method to retrieve the results of any job, regardless of whether it was submitted with a callback URL and the `recognitions.completed_with_results` event, and you can retrieve the results multiple times for as long as they remain available. \n\n<b>Note:</b> This method is currently a beta release that supports US English only."
+      produces: 
+        - "application/json"
+      parameters: 
+        - 
+          name: "id"
+          in: "path"
+          description: "The ID of the job whose status is to be checked."
+          required: true
+          type: "string"
+      responses: 
+        200: 
+          description: "<b>OK</b>."
+          schema: 
+            $ref: "#/definitions/JobStatus"
+        404: 
+          description: "<b>Not Found</b>. The specified job ID was not found."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+        503: 
+          description: "<b>Service Unavailable</b>. The service is currently unavailable."
+          schema: 
+            $ref: "#/definitions/ErrorSessionless"
+definitions: 
+  JobsStatusList: 
+    required: 
+      - "recognitions"
+    properties: 
+      recognitions: 
+        description: "An array of objects that provides the status for each of the user's current jobs. The array is empty if the user has no current jobs."
+        type: "array"
+        items: 
+          $ref: "#/definitions/JobsStatus"
+  JobsStatus: 
+    required: 
+      - "id"
+      - "status"
+    properties: 
+      id: 
+        description: "The ID of the job."
+        type: "string"
+      status: 
+        description: "The current status of the job: `waiting`: The service is preparing the job for processing; the service always returns this status when the job is initially created. `processing`: The service is actively processing the job. `completed`: The service has finished processing the job; if the job specified a callback URL and the event `recognitions.completed_with_results`, the service sent the results with the callback notification; otherwise, use the `GET recognitions/{id}` method to retrieve the results. `failed`: The job failed."
+        type: "string"
+      url: 
+        description: "For a `POST /v1/recognitions` request, the URL to use to request information about the job with the `GET recognitions/{id}` method."
+        type: "string"
+      user_token: 
+        description: "For a `GET /v1/recognitions` request, the user token associated with the job if the job was created with a callback URL and a user token."
+        type: "string"
+  JobStatus: 
+    required: 
+      - "status"
+    properties: 
+      status: 
+        description: "The current status of the job: `waiting`: The service is preparing the job for processing; the service also returns this status when the job is initially created. `processing`: The service is actively processing the job. `completed`: The service has finished processing the job; if the job specified a callback URL and the event `recognitions.completed_with_results`, the service sent the results with the callback notification; otherwise, use the `GET recognitions/{id}` method to retrieve the results. `failed`: The job failed."
+        type: "string"
+      id: 
+        description: "If the status is not `completed`, the ID of the job."
+        type: "string"
+      results: 
+        description: "If the status is `completed`, the results of the recognition request as an array that includes a single instance of a `SpeechRecognitionEvent` object."
+        type: "array"
+        items: 
+          $ref: "#/definitions/SpeechRecognitionEvent"
+  RegisterStatus: 
+    required: 
+      - "status"
+      - "url"
+    properties: 
+      status: 
+        description: "The current status of the job: `created` if the callback URL was successfully white-listed as a result of the call or `already created` if the URL was already white-listed."
+        type: "string"
+      url: 
+        description: "The callback URL that is successfully registered."
+        type: "string"
+  SpeechRecognitionEvent: 
+    required: 
+      - "results"
+      - "result_index"
+    properties: 
+      results: 
+        description: "The results array consists of zero or more final results followed by zero or one interim result. The final results are guaranteed not to change; the interim result may be replaced by zero or more final results (followed by zero or one interim result). The service periodically sends updates to the result list, with the `result_index` set to the lowest index in the array that has changed."
+        type: "array"
+        items: 
+          $ref: "#/definitions/SpeechRecognitionResult"
+      result_index: 
+        description: "An index that indicates the change point in the `results` array."
+        type: "integer"
+        format: "int32"
+      warnings: 
+        description: "An array of warning messages about invalid query parameters or JSON fields included with the request. Each warning includes a descriptive message and a list of invalid argument strings. For example, a message such as `\"Unknown arguments:\"` or `\"Unknown url query arguments:\"` followed by a list of the form `\"invalid_arg_1, invalid_arg_2.\"` The request succeeds despite the warnings."
+        type: "array"
+        items: 
+          type: "string"
+  SpeechRecognitionResult: 
+    required: 
+      - "final"
+      - "alternatives"
+    properties: 
+      final: 
+        description: "If `true`, the result for this utterance is not updated further."
+        type: "boolean"
+      alternatives: 
+        description: "Array of alternative transcripts."
+        type: "array"
+        items: 
+          $ref: "#/definitions/SpeechRecognitionAlternative"
+      keywords_result: 
+        description: "Dictionary (or associative array) whose keys are the strings specified for `keywords` if both that parameter and `keywords_threshold` are specified. A keyword for which no matches are found is omitted from the array."
+        $ref: "#/definitions/KeywordResults"
+      word_alternatives: 
+        description: "Array of word alternative hypotheses found for words of the input audio if `word_alternatives_threshold` is not null."
+        type: "array"
+        items: 
+          $ref: "#/definitions/WordAlternativeResults"
+  KeywordResults: 
+    required: 
+      - "keyword"
+    properties: 
+      keyword: 
+        description: "List of each keyword entered via the `keywords` parameter and, for each keyword, an array of `KeywordResult` objects that provides information about its occurrences in the input audio. The keys of the list are the actual keyword strings. A keyword for which no matches are spotted in the input is omitted from the array."
+        type: "array"
+        items: 
+          $ref: "#/definitions/KeywordResult"
+  KeywordResult: 
+    required: 
+      - "normalized_text"
+      - "start_time"
+      - "end_time"
+      - "confidence"
+    properties: 
+      normalized_text: 
+        description: "Specified keyword normalized to the spoken phrase that matched in the audio input."
+        type: "string"
+      start_time: 
+        description: "Start time in hundredths of seconds of the keyword match."
+        type: "number"
+        format: "double"
+      end_time: 
+        description: "End time in hundredths of seconds of the keyword match."
+        type: "number"
+        format: "double"
+      confidence: 
+        description: "Confidence score of the keyword match in the range of 0 to 1."
+        type: "number"
+        format: "double"
+        minimum: 0
+        maximum: 1
+  WordAlternativeResults: 
+    required: 
+      - "start_time"
+      - "end_time"
+      - "alternatives"
+    properties: 
+      start_time: 
+        description: "Start time in hundredths of seconds of the word from the input audio that corresponds to the word alternatives."
+        type: "number"
+        format: "double"
+      end_time: 
+        description: "End time in hundredths of seconds of the word from the input audio that corresponds to the word alternatives."
+        type: "number"
+        format: "double"
+      alternatives: 
+        description: "Array of word alternative hypotheses for a word from the input audio."
+        type: "array"
+        items: 
+          $ref: "#/definitions/WordAlternativeResult"
+  WordAlternativeResult: 
+    required: 
+      - "confidence"
+      - "word"
+    properties: 
+      confidence: 
+        description: "Confidence score of the word alternative hypothesis."
+        type: "number"
+        format: "double"
+        minimum: 0
+        maximum: 1
+      word: 
+        description: "Word alternative hypothesis for a word from the input audio."
+        type: "string"
+  SpeechRecognitionAlternative: 
+    required: 
+      - "transcript"
+    properties: 
+      transcript: 
+        description: "Transcription of the audio."
+        type: "string"
+      confidence: 
+        description: "Confidence score of the transcript in the range of 0 to 1. Available only for the best alternative and only in results marked as final."
+        type: "number"
+        format: "double"
+        minimum: 0
+        maximum: 1
+      timestamps: 
+        description: "Time alignments for each word from transcript as a list of lists. Each inner list consists of three elements: the word followed by its start and end time in hundredths of seconds. Example: `[[\"hello\",0.0,1.2],[\"world\",1.2,2.5]]`. Available only for the best alternative."
+        type: "array"
+        items: 
+          type: "string"
+      word_confidence: 
+        description: "Confidence score for each word of the transcript as a list of lists. Each inner list consists of two elements: the word and its confidence score in the range of 0 to 1. Example: `[[\"hello\",0.95],[\"world\",0.866]]`. Available only for the best alternative and only in results marked as final."
+        type: "array"
+        items: 
+          type: "string"
+  ModelSet: 
+    description: "Information about the available models."
+    required: 
+      - "models"
+    properties: 
+      models: 
+        type: "array"
+        items: 
+          $ref: "#/definitions/Model"
+  Model: 
+    required: 
+      - "name"
+      - "rate"
+      - "url"
+      - "language"
+      - "description"
+    properties: 
+      name: 
+        description: "Name of the model for use as an identifier in calls to the service (for example, `en-US_BroadbandModel`)."
+        type: "string"
+      language: 
+        description: "Language identifier for the model (for example, `en-US`)."
+        type: "string"
+      rate: 
+        description: "Sampling rate (minimum acceptable rate for audio) used by the model in Hertz."
+        type: "integer"
+        format: "int32"
+      url: 
+        description: "URI for the model."
+        type: "string"
+      sessions: 
+        description: "URI for the model for use with the POST `/v1/sessions` method."
+        type: "string"
+      description: 
+        description: "Brief description of the model."
+        type: "string"
+  Session: 
+    required: 
+      - "session_id"
+      - "new_session_uri"
+      - "recognize"
+      - "observe_result"
+      - "recognizeWS"
+    properties: 
+      session_id: 
+        description: "Identifier for the new session."
+        type: "string"
+      new_session_uri: 
+        description: "URI for the new session."
+        type: "string"
+      recognize: 
+        description: "URI for REST recognition requests."
+        type: "string"
+      observe_result: 
+        description: "URI for REST results observers."
+        type: "string"
+      recognizeWS: 
+        description: "URI for WebSocket recognition requests. Needed only for working with the WebSocket interface."
+        type: "string"
+  Metadata: 
+    required: 
+      - "part_content_type"
+    properties: 
+      part_content_type: 
+        description: "The MIME type of the data in the following parts. All data parts must have the same MIME type."
+        type: "string"
+        enum: 
+          - "audio/flac"
+          - "audio/l16"
+          - "audio/wav"
+          - "audio/basic"
+          - "audio/ogg;codecs=opus"
+      data_parts_count : 
+        description: "The number of audio data parts (audio files) sent with the request. Server-side end-of-stream detection is applied to the last (and possibly the only) data part. If omitted, the number of parts is determined from the request itself."
+        type: "integer"
+        format: "int32"
+      sequence_id: 
+        description: "The sequence ID for all data parts of this recognition task in the form of a user-specified integer. If omitted, no sequence ID is associated with the recognition task. Used only for session-based requests."
+        type: "integer"
+        format: "int32"
+      continuous: 
+        description: "If `true`, multiple final results that represent consecutive phrases separated by pauses are returned. If `false` (the default), recognition ends after the first \"end of speech\" incident is detected."
+        type: "boolean"
+        default: false
+      inactivity_timeout: 
+        description: "The time in seconds after which, if only silence (no speech) is detected in submitted audio, the connection is closed with a 400 error and, for session-based methods, with `session_closed` set to `true`. Useful for stopping audio submission from a live microphone when a user simply walks away. Use `-1` for infinity. See also the `continuous` parameter."
+        type: "number"
+        format: "int32"
+        default: 30
+      keywords: 
+        description: "Array of keyword strings to spot in the audio. Each keyword string can include one or more tokens. Keywords are spotted only in the final hypothesis, not in interim results. Omit the parameter or specify an empty array if you do not need to spot keywords."
+        type: "array"
+        items: 
+          type: "string"
+      keywords_threshold: 
+        description: "Confidence value that is the lower bound for spotting a keyword. A word is considered to match a keyword if its confidence is greater than or equal to the threshold. Specify a probability between 0 and 1 inclusive. No keyword spotting is performed if the default value (null) is used. If you specify a threshold, you must also specify one or more keywords."
+        type: "number"
+        format: "float"
+      max_alternatives: 
+        description: "Maximum number of alternative transcripts to be returned. By default, a single transcription is returned."
+        type: "integer"
+        format: "int32"
+        default: 1
+      word_alternatives_threshold: 
+        description: "Confidence value that is the lower bound for identifying a hypothesis as a possible word alternative (also known as \"Confusion Networks\"). An alternative word is considered if its confidence is greater than or equal to the threshold. Specify a probability between 0 and 1 inclusive. No alternative words are computed if the default value (null) is used."
+        type: "number"
+        format: "float"
+      word_confidence: 
+        description: "If `true`, a confidence measure in the range 0 to 1 is returned for each word."
+        type: "boolean"
+        default: false
+      timestamps: 
+        description: "If `true`, time alignment for each word is returned."
+        type: "boolean"
+        default: false
+      profanity_filter: 
+        description: "If `true` (the default), filters profanity from all output except for keyword results by replacing inappropriate words with a series of asterisks. Set the parameter to `false` to return results with no censoring. Applies to US English transcription only."
+        type: "boolean"
+        default: true
+      smart_formatting: 
+        description: "If `true`, converts dates, times, series of digits and numbers, phone numbers, currency values, and Internet addresses into more readable, conventional representations in the final transcript of a recognition request. If `false` (the default), no formatting is performed. Applies to US English transcription only."
+        type: "boolean"
+        default: false
+  RecognizeStatus: 
+    required: 
+      - "session"
+    properties: 
+      session: 
+        description: "Description of the state and possible actions for the current session."
+        $ref: "#/definitions/SessionStatus"
+  SessionStatus: 
+    required: 
+      - "state"
+      - "model"
+      - "recognize"
+      - "observe_result"
+      - "recognizeWS"
+    properties: 
+      state: 
+        description: "State of the session. The state must be `initialized` to perform a new recognition request on the session."
+        type: "string"
+      model: 
+        description: "URI for information about the model that is used with the session."
+        type: "string"
+      recognize: 
+        description: "URI for REST recognition requests."
+        type: "string"
+      observe_result: 
+        description: "URI for REST results observers."
+        type: "string"
+      recognizeWS: 
+        description: "URI for WebSocket recognition requests. Needed only for working with the WebSocket interface."
+        type: "string"
+  ErrorSession: 
+    required: 
+      - "error"
+      - "code"
+      - "code_description"
+      - "session_closed"
+    properties: 
+      error: 
+        description: "Description of the problem."
+        type: "string"
+      code: 
+        description: "HTTP response code."
+        type: "integer"
+        format: "int32"
+      code_description: 
+        description: "Response message."
+        type: "string"
+      session_closed: 
+        description: "Specifies the value `true` if the active session is closed as a result of the problem."
+        type: "boolean"
+  ErrorSessionless: 
+    required: 
+      - "error"
+      - "code"
+      - "code_description"
+    properties: 
+      error: 
+        description: "Description of the problem."
+        type: "string"
+      code: 
+        description: "HTTP response code."
+        type: "integer"
+        format: "int32"
+      code_description: 
+        description: "Response message."
+        type: "string"

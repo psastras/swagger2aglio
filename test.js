@@ -3,7 +3,7 @@ var swagger2aglio = require('./index');
 
 describe('Swagger documentation generator', function () {
 
-  var petstorePath = './petstore_expanded.yml'; 
+  var petstorePath = './example.yml'; 
 
   it ('should run with minimal arguments', function (done) {
     swagger2aglio.convert({
