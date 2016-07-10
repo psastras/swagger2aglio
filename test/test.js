@@ -1,11 +1,12 @@
 var assert = require('assert');
 var swagger2aglio = require('./../index');
+var exec = require('child_process').exec;
 
 describe('Swagger documentation generator', function () {
 
-  var petstorePath = './example.yml'; 
+  var petstorePath = './example.yml';
 
-  it ('should run with minimal arguments', function (done) {
+  it('should run with minimal arguments', function (done) {
     swagger2aglio.convert({
       input: petstorePath
     }, function (err, html) {
@@ -15,8 +16,8 @@ describe('Swagger documentation generator', function () {
     });
   });
 
-  it ('should accept theme parameters', function (done) {
-    swagger2aglio.convert({ 
+  it('should accept theme parameters', function (done) {
+    swagger2aglio.convert({
       input: petstorePath,
       themeTemplate: 'triple',
       themeVariables: 'slate',
@@ -25,5 +26,24 @@ describe('Swagger documentation generator', function () {
       assert(html);
       done();
     });
+  });
+
+  describe('command line', function () {
+
+    it('should require an input file to be specified', function (done) {
+      exec("node index.js", function (error, stdout, stderr) {
+         assert(error);
+         assert(stderr);
+         done();
+      });
+    });
+
+    it('should write ouput to a specified file', function (done) {
+      exec("node index.js -i " + petstorePath + " -o .test.html", function (error, stdout, stderr) {
+         assert.ifError(error);
+         done();
+      });
+    });
+    
   });
 });
