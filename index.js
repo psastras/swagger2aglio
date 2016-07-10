@@ -3,6 +3,7 @@
 var aglio = require('aglio');
 var colors = require('colors');
 var fs = require('fs');
+var minify = require('html-minifier').minify;
 var prettyjson = require('prettyjson');
 var program = require('commander');
 var swagger2blueprint = require('swagger2blueprint');
@@ -21,6 +22,7 @@ if (isMain) {
     .option('--theme-variables <variables>', 'adjust theme variables such as color (ex. slate)')
     .option('--no-theme-condense', 'disable condensing navigation links')
     .option('--theme-style <less/css file>', 'specify a custom theme style file')
+    .option('--no-minify', 'disable html minification')
     .parse(process.argv);
 
   // Check input
@@ -65,6 +67,22 @@ function convert(program, callback) {
           warn(prettyjson.render(warning, { noColor: true }));
         });
         warn("\n");
+      }
+
+      if (!program.noMinify) {
+        html = minify(html, {
+          collapseBooleanAttributes: true,
+          collapseWhitespace: true,
+          minifyCSS: true,
+          minifyJS: true,
+          minifyURLs: true,
+          removeAttributeQuotes: true,
+          removeComments: true,
+          removeEmptyAttributes: true,
+          removeOptionalTags: true,
+          removeRedundantAttributes: true,
+          useShortDoctype: true
+        });
       }
 
       // If output is specified, write to file.  Otherwise write to console.
