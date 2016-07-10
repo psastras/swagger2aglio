@@ -7,6 +7,7 @@
   },
   "scripts": {
     "test": "eslint index.js test.js && mocha",
+    "examples": "node index.js -i petstore_expanded.yml -o examples/default.html && node index.js -i petstore_expanded.yml --theme-variables flatly --theme-template triple -o examples/flatly_triple.html",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "repository": {

@@ -1,8 +1,25 @@
 # Swagger to Aglio API Documentation
 
+[![Build Status](https://travis-ci.org/psastras/swagger2aglio.svg?branch=master)](https://travis-ci.org/psastras/swagger2aglio)
+[![npm version](https://badge.fury.io/js/swagger2aglio.svg)](https://badge.fury.io/js/swagger2aglio)
+[![Dependency Status](https://david-dm.org/psastras/swagger2aglio.svg)](https://david-dm.org/psastras/swagger2aglio)
+[![devDependency Status](https://david-dm.org/psastras/swagger2aglio/dev-status.svg)](https://david-dm.org/psastras/swagger2aglio#info=devDependencies)
+[![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
+
 Converts a Swagger API description into the API Blueprint format and then to Aglio documentation.
 
 Currently supports Swagger version 2.0.
+
+## Example Output
+
+Example output is generated from the Swagger Petstore Expanded example
+
+- [Default two column theme](http://htmlpreview.github.io/?https://raw.githubusercontent.com/psastras/swagger2aglio/blob/master/examples/default.html)
+
+  `swagger2aglio -i petstore_expanded.yml -o examples/default.html`
+- [Flatly three column theme](http://htmlpreview.github.io/?https://raw.githubusercontent.com/psastras/swagger2aglio/blob/master/examples/flatly_triple.html)
+
+  `swagger2aglio -i petstore_expanded.yml -o examples/default.html --theme-variables flatly --theme-template triple -o examples/flatly_triple.html`
 
 ## Installation and Usage
 
