@@ -4,6 +4,7 @@ var aglio = require('aglio');
 var colors = require('colors');
 var fs = require('fs');
 var minify = require('html-minifier').minify;
+var path = require('path');
 var prettyjson = require('prettyjson');
 var program = require('commander');
 var swagger2blueprint = require('swagger2blueprint');
@@ -47,7 +48,9 @@ function convert(program, callback) {
 
   // Read in aglio options
   var options = {
-    themeTemplate: program.themeTemplate,
+    themeTemplate: (program.themeTemplate === 'triple' || program.themeTemplate === 'index' || !program.themeTemplate) ?
+      path.resolve(__dirname, 'templates/' + (program.themeTemplate || 'index') +'.jade') :
+      themeTemplate,
     themeVariables: program.themeVariables,
     themeFullWidth: program.themeFullWidth,
     noThemeCondense: program.noThemeCondense,
