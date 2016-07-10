@@ -6,11 +6,12 @@
     "swagger2aglio": "./index.js"
   },
   "scripts": {
-    "test": "eslint index.js test.js && mocha",
     "cover": "istanbul cover  node_modules/mocha/bin/_mocha",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
-    "examples": "node index.js -i petstore_expanded.yml -o examples/default.html && node index.js -i petstore_expanded.yml --theme-variables flatly --theme-template triple -o examples/flatly_triple.html",
-    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
+    "examples": "node index.js -s -i petstore_expanded.yml -o examples/default.html && node index.js -s -i petstore_expanded.yml --theme-variables flatly --theme-template triple -o examples/flatly_triple.html",
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post",
+    "start": "node server.js",
+    "test": "eslint index.js test.js && mocha"
   },
   "repository": {
     "type": "git",
@@ -41,9 +42,15 @@
   "devDependencies": {
     "coveralls": "^2.11.9",
     "eslint": "^3.0.1",
+    "express": "^4.14.0",
     "istanbul": "^0.4.4",
     "mocha": "^2.5.3",
     "mocha-lcov-reporter": "^1.2.0",
-    "semantic-release": "^4.3.5"
+    "morgan": "^1.7.0",
+    "reload": "^1.0.0",
+    "semantic-release": "^4.3.5",
+    "serve-index": "^1.8.0",
+    "serve-static": "^1.11.1",
+    "watch": "^0.19.1"
   }
 }

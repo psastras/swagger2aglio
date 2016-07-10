@@ -94,6 +94,23 @@ In addition, the [default theme](https://github.com/danielgtaylor/aglio/tree/oli
 | themeTemplate    | string |           | Layout name or path to custom layout file    |
 | themeStyle       | string | `default` | Built-in style name or path to LESS or CSS   |
 
+## Development
+
+For development, first clone the repository.  Then install dependencies:
+
+```shell
+npm install
+```
+
+To start the development hot reload server, run:
+
+```shell
+npm run start
+```
+
+Then, in a browser go to [http://localhost:3000](http://localhost:3000) and select an example.
+Changes made to any of the Jade templates will be automatically reloaded and displayed in the browser.
+
 ## License
 
 Copyright (c) 2016 Paul Sastrasinh

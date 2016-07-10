@@ -24,6 +24,7 @@ if (isMain) {
     .option('--no-theme-condense', 'disable condensing navigation links')
     .option('--theme-style <less/css file>', 'specify a custom theme style file')
     .option('--no-minify', 'disable html minification')
+    .option('-s, --server', 'enable live reloading script for development')
     .parse(process.argv);
 
   // Check input
@@ -54,7 +55,10 @@ function convert(program, callback) {
     themeVariables: program.themeVariables,
     themeFullWidth: program.themeFullWidth,
     noThemeCondense: program.noThemeCondense,
-    themeStyle: program.themeStyle
+    themeStyle: program.themeStyle,
+    locals: {
+      livePreview: program.server
+    }
   };
 
   swagger2blueprint.run({ '_': [program.input] }, function (err, blueprint) {

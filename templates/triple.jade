@@ -24,10 +24,4 @@ html
         script: include scripts.js
 
         if self.livePreview
-            script(src="/socket.io/socket.io.js")
-            script.
-                var socket = io();
-                socket.on('refresh', refresh);
-                socket.on('reconnect', function () {
-                    socket.emit('request-refresh');
-                });
+            script(src="/reload/reload.js")
