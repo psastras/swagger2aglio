@@ -15,7 +15,7 @@ Currently supports Swagger version 2.0.
 
 Three column streak theme screenshot:
 
-![Three column streak theme screenshot](https://raw.githubusercontent.com/psastras/swagger2aglio/master/screenshot.png)
+![Three column streak theme screenshot](screenshot.png)
 
 Example output is generated from the IBM Watson API
 
