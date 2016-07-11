@@ -7,7 +7,8 @@ var configs = [
   ['-s', '--theme-full-width', '--theme-variables', 'slate', '-i', 'example.yml', '-o', 'examples/slate_wide.html'],
   ['-s', '--theme-full-width', '--theme-variables', 'streak', '-i', 'example.yml', '-o', 'examples/streak_wide.html'],
   ['-s', '--theme-variables', 'flatly', '--theme-template', 'triple', '-i', 'example.yml', '-o', 'examples/flatly_triple.html'],
-  ['-s', '--theme-variables', 'slate', '--theme-template', 'triple', '-i', 'example.yml', '-o', 'examples/slate_triple.html'],
+  ['-s', '--theme-variables', 'slate', '--theme-template', 'triple', '-i', 'example.yml', '-o', 'examples/slate_triple.html'],,
+  ['-s', '--theme-variables', 'streak', '--theme-template', 'triple', '-i', 'example.yml', '-o', 'examples/streak_triple.html'],
 ]
 
 configs.forEach(function (config) {

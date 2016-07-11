@@ -13,7 +13,11 @@ Currently supports Swagger version 2.0.
 
 ## Example Output
 
-Example output is generated from the Swagger Petstore Expanded example
+Three column streak theme screenshot:
+
+![Three column streak theme screenshot](https://raw.githubusercontent.com/psastras/swagger2aglio/master/screenshot.png)
+
+Example output is generated from the IBM Watson API
 
 - [Default two column theme](https://rawgit.com/psastras/swagger2aglio/master/examples/default.html)
 
