@@ -47,11 +47,10 @@ mixin Nav()
                     each resource in resourceGroup.resources || []
                       li
                           if !self.condenseNav || (resource.actions.length != 1)
-                              a(href=resource.elementLink)!= resource.name || 'Resource'
-                              ul: each action in resource.actions || []
-                                  li: a(href=action.elementLink)
-                                    +Badge(action.method)
-                                    != action.name || action.method + ' ' + (action.attributes && action.attributes.uriTemplate || resource.uriTemplate)
+                              each action in resource.actions || []
+                                li: a(href=action.elementLink)
+                                  +Badge(action.method)
+                                  != action.name || action.method + ' ' + (action.attributes && action.attributes.uriTemplate || resource.uriTemplate)
                           else
                               - var action = resource.actions[0]
                               a(href=action.elementLink)
@@ -71,10 +70,10 @@ mixin Parameters(params)
         .collapse-button.show
             span.close Hide
             span.open Show
-    .collapse-content
+    .collapse-content(style="padding-bottom: 1em")
         dl.inner: each param in params || []
-            dt= self.urldec(param.name)
-            dd
+            dt(style="padding: 0.2em 0em")= self.urldec(param.name)
+            dd(style="padding: 0.2em 0em")
                 code= param.type || 'string'
                 | &nbsp;
                 if param.required
@@ -168,10 +167,6 @@ mixin Content()
 
             each resource in resourceGroup.resources || []
                 .resource(id=resource.elementId)
-                    h3.resource-heading
-                        != resource.name || ((resource.actions[0] != null) && resource.actions[0].name) || 'Resource'
-                        = " "
-                        a.permalink(href=resource.elementLink) &nbsp;&para;
                     if resource.description
                         != self.markdown(resource.description)
 
@@ -208,7 +203,7 @@ mixin ContentTriple()
 
     .right
         h5 API Endpoint
-        a(href=self.api.host)= self.api.host
+        a(href=self.api.host)= self.host
     .middle
         if self.api.descriptionHtml
             != self.api.descriptionHtml
@@ -228,10 +223,6 @@ mixin ContentTriple()
         each resource in resourceGroup.resources || []
             .middle
                 .resource(id=resource.elementId)
-                    h3.resource-heading
-                        != resource.name || ((resource.actions[0] != null) && resource.actions[0].name) || 'Resource'
-                        = " "
-                        a.permalink(href=resource.elementLink) &para;
                     if resource.description
                         != self.markdown(resource.description)
 
@@ -252,7 +243,8 @@ mixin ContentTriple()
                                   each example in action.examples
                                       each request in example.requests
                                           - requestCount++
-                                          span.tab-button= request.name || 'example ' + requestCount
+                                          if example.requests.length > 1
+                                            span.tab-button= request.name || 'Request ' + requestCount
                               each example in action.examples
                                   each request in example.requests
                                       .tab

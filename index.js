@@ -7,12 +7,13 @@ var minify = require('html-minifier').minify;
 var path = require('path');
 var prettyjson = require('prettyjson');
 var program = require('commander');
+var refparser = require('json-schema-ref-parser');
 var swagger2blueprint = require('swagger2blueprint');
 
 // true if being run from the command line, false if included from script
 var isMain = require.main === module
 
-if (isMain) {  
+if (isMain) {
   // Define program arguments
   program
     .version('1.0.0')
@@ -47,65 +48,72 @@ function convert(program, callback) {
     callback = function (err, blueprint) { }
   }
 
-  // Read in aglio options
-  var options = {
-    themeTemplate: (program.themeTemplate === 'triple' || program.themeTemplate === 'index' || !program.themeTemplate) ?
-      path.resolve(__dirname, 'templates/' + (program.themeTemplate || 'index') +'.jade') :
-      themeTemplate,
-    themeVariables: program.themeVariables,
-    themeFullWidth: program.themeFullWidth,
-    noThemeCondense: program.noThemeCondense,
-    themeStyle: program.themeStyle,
-    locals: {
-      livePreview: program.server
-    }
-  };
-
-  swagger2blueprint.run({ '_': [program.input] }, function (err, blueprint) {
+  // Read in the file
+  refparser.parse(program.input, function (err, schema) {
     if (err) isMain ? halt(err) : callback(err);
-    aglio.render(blueprint, options, function (err, html, warnings) {
+    // Read in aglio options
+    var options = {
+      themeTemplate: (program.themeTemplate === 'triple' || program.themeTemplate === 'index' || !program.themeTemplate) ?
+        path.resolve(__dirname, 'templates/' + (program.themeTemplate || 'index') + '.jade') :
+        themeTemplate,
+      themeVariables: program.themeVariables,
+      themeFullWidth: program.themeFullWidth,
+      noThemeCondense: program.noThemeCondense,
+      themeStyle: program.themeStyle,
+      locals: {
+        livePreview: program.server,
+        host: ((schema.schemes && schema.schemes.length > 0) ? 
+          (schema.schemes[0] || 'https') 
+          : 'https') 
+          + '://' + schema.host + (schema.basePath || '')
+      }
+    };
+
+    swagger2blueprint.run({ '_': [program.input] }, function (err, blueprint) {
       if (err) isMain ? halt(err) : callback(err);
+      aglio.render(blueprint, options, function (err, html, warnings) {
+        if (err) isMain ? halt(err) : callback(err);
 
-      // If we had warnings and not outputting to console, print them out and continue.
-      if (warnings && !program.output && isMain) {
-        warn('Encountered ' + warnings.length + ' warnings: \n');
-        warnings.forEach(function (warning) {
+        // If we had warnings and not outputting to console, print them out and continue.
+        if (warnings && !program.output && isMain) {
+          warn('Encountered ' + warnings.length + ' warnings: \n');
+          warnings.forEach(function (warning) {
+            warn("\n");
+            warn(prettyjson.render(warning, { noColor: true }));
+          });
           warn("\n");
-          warn(prettyjson.render(warning, { noColor: true }));
-        });
-        warn("\n");
-      }
+        }
 
-      if (!program.noMinify) {
-        html = minify(html, {
-          collapseBooleanAttributes: true,
-          collapseWhitespace: true,
-          minifyCSS: true,
-          minifyJS: true,
-          minifyURLs: true,
-          removeAttributeQuotes: true,
-          removeComments: true,
-          removeEmptyAttributes: true,
-          removeOptionalTags: true,
-          removeRedundantAttributes: true,
-          useShortDoctype: true
-        });
-      }
+        if (!program.noMinify) {
+          html = minify(html, {
+            collapseBooleanAttributes: true,
+            collapseWhitespace: true,
+            minifyCSS: true,
+            minifyJS: true,
+            minifyURLs: true,
+            removeAttributeQuotes: true,
+            removeComments: true,
+            removeEmptyAttributes: true,
+            removeOptionalTags: true,
+            removeRedundantAttributes: true,
+            useShortDoctype: true
+          });
+        }
 
-      // If output is specified, write to file.  Otherwise write to console.
-      if (program.output) {
-        fs.writeFile(program.output, html, function (err) {
-          if (err) isMain ? halt(err) : callback(err);
-          success("Success! Output written to: " + program.output);
+        // If output is specified, write to file.  Otherwise write to console.
+        if (program.output) {
+          fs.writeFile(program.output, html, function (err) {
+            if (err) isMain ? halt(err) : callback(err);
+            success("Success! Output written to: " + program.output);
+            callback(null, html);
+          });
+        } else {
+          if (isMain) console.log(html);
           callback(null, html);
-        });
-      } else {
-        if (isMain) console.log(html);
-        callback(null, html);
-      }
+        }
+      });
     });
   });
-
 }
 
 /**

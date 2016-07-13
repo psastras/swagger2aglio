@@ -8,6 +8,10 @@ html
         title= self.api.name || 'API Documentation'
         link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css")
         style!= self.css
+        style.
+          p img {
+            width: 100%;
+          }
     body.preload
         a.text-muted.back-to-top(href='#top')
             i.fa.fa-toggle-up
@@ -22,6 +26,5 @@ html
                         +Content('primary', false)
 
         script: include scripts.js
-
         if self.livePreview
             script(src="/reload/reload.js")
