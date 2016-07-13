@@ -245,18 +245,20 @@ mixin ContentTriple()
                                           - requestCount++
                                           if example.requests.length > 1
                                             span.tab-button= request.name || 'Request ' + requestCount
-                              each example in action.examples
+                              - var example = action.examples[0]
+                              - example.responses = action.examples.map(function(example) { return example.responses; }).reduce(function(a, b) { return a.concat(b);}, []);
+                              .tabs
                                   each request in example.requests
                                       .tab
                                           +RequestResponseBody(request, false, true)
-                                          .tabs
-                                              .example-names
-                                                  span Responses
-                                                  each response in example.responses
-                                                      span.tab-button= response.name
-                                              each response in example.responses
-                                                  .tab
-                                                      +RequestResponseBody(response, false, true)
+                              .tabs
+                                  .example-names
+                                      span Responses
+                                      each response in example.responses
+                                          span.tab-button= response.name
+                                  each response in example.responses
+                                      .tab
+                                          +RequestResponseBody(response, false, true)
                           else
                             each example in action.examples
                                 .tabs
