@@ -203,7 +203,7 @@ mixin ContentTriple()
 
     .right
         h5 API Endpoint
-        a(href=self.api.host)= self.host
+        a(href=self.host)= self.host
     .middle
         if self.api.descriptionHtml
             != self.api.descriptionHtml

@@ -8,7 +8,7 @@ var path = require('path');
 var prettyjson = require('prettyjson');
 var program = require('commander');
 var refparser = require('json-schema-ref-parser');
-var swagger2blueprint = require('swagger2blueprint');
+var swag2blue = require('swag2blue');
 
 // true if being run from the command line, false if included from script
 var isMain = require.main === module
@@ -69,7 +69,7 @@ function convert(program, callback) {
       }
     };
 
-    swagger2blueprint.run({ '_': [program.input] }, function (err, blueprint) {
+    swag2blue.run({ '_': [program.input] }, function (err, blueprint) {
       if (err) isMain ? halt(err) : callback(err);
       aglio.render(blueprint, options, function (err, html, warnings) {
         if (err) isMain ? halt(err) : callback(err);

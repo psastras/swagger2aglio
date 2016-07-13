@@ -5,12 +5,15 @@ include mixins.jade
 html
     head
         meta(charset="utf-8")
-        title= self.api.name || 'API Documentation'
+        title= 'API Documentation'
         link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css")
         style!= self.css
         style.
           p img {
             width: 100%;
+          }
+          dd p {
+            margin: 0.5em 0em;
           }
     body.preload
         #nav-background
