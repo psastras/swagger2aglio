@@ -8,8 +8,7 @@
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 
 Swagger2Aglio is a REST API documentation generator.  It converts a Swagger API description into the API Blueprint
-format and then to Aglio documentation.  It also contains slightly modified Jade templates which are more amenable
-to Swagger definitions.
+format and then to Aglio documentation.  The final output is a single static HTML page, easily served from any webserver.
 
 Currently supports Swagger version 2.0.
 
