@@ -9,11 +9,21 @@ html
         link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css")
         style!= self.css
         style.
+          .heading a {
+            font-size: 1.2em;
+          }
           p img {
             width: 100%;
           }
           dd p {
             margin: 0.5em 0em;
+          }
+          p {
+            line-height: 150%;
+          }
+          code {
+            padding: 0em 0.25em;
+            margin: 0em;
           }
     body.preload
         a.text-muted.back-to-top(href='#top')

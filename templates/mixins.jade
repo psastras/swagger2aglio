@@ -67,10 +67,7 @@ mixin Parameters(params)
     //- examples and descriptions.
     .title
         strong URI Parameters
-        .collapse-button.show
-            span.close Hide
-            span.open Show
-    .collapse-content(style="padding-bottom: 1em")
+    div
         dl.inner: each param in params || []
             dt(style="padding: 0.2em 0em")= self.urldec(param.name)
             dd(style="padding: 0.2em 0em")
