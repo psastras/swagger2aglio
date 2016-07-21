@@ -1,6 +1,6 @@
 {
   "name": "swagger2aglio",
-  "description": "Swagger 2.0 Documentation Generator Using Blueprints Aglio",
+  "description": "Swagger API Documentation HTML Generator",
   "main": "index.js",
   "bin": {
     "swagger2aglio": "./index.js"
@@ -8,9 +8,9 @@
   "scripts": {
     "cover": "istanbul cover node_modules/mocha/bin/_mocha",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
-    "examples": "node examples.js",
+    "examples": "set NOCACHE=1&& node examples.js",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post",
-    "start": "node server.js",
+    "start": "set NOCACHE=1&& node server.js",
     "test": "eslint index.js test/test.js && mocha"
   },
   "repository": {
@@ -37,7 +37,7 @@
     "commander": "^2.9.0",
     "html-minifier": "^3.0.1",
     "json-schema-ref-parser": "^3.1.2",
-    "prettyjson": "1.1.3",
+    "prettyjson": "^1.1.3",
     "swag2blue": "^1.0.1"
   },
   "devDependencies": {
