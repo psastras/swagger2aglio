@@ -62,7 +62,7 @@ function convert(program, callback) {
       themeStyle: program.themeStyle,
       locals: {
         livePreview: program.server,
-        host: ((schema.schemes && schema.schemes.length > 0) ? 
+        host: ((schema.schemes && schema.schemes.length > 0 && schema.host) ? 
           (schema.schemes[0] || 'https') 
           : 'https') 
           + '://' + schema.host + (schema.basePath || '')
