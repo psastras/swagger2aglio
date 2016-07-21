@@ -7,7 +7,9 @@
 [![devDependency Status](https://david-dm.org/psastras/swagger2aglio/dev-status.svg)](https://david-dm.org/psastras/swagger2aglio#info=devDependencies)
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 
-Converts a Swagger API description into the API Blueprint format and then to Aglio documentation.
+Swagger2Aglio is a REST API documentation generator.  It converts a Swagger API description into the API Blueprint
+format and then to Aglio documentation.  It also contains slightly modified Jade templates which are more amenable
+to Swagger definitions.
 
 Currently supports Swagger version 2.0.
 
@@ -96,10 +98,11 @@ swagger2aglio.convert(options, function (err, html) {
 
 Render a Swagger file to HTML. Available options are:
 
-| Option      | Type   | Default       | Description                           |
-| ----------- | ------ | ------------- | ------------------------------------- |
-| input       | string |               | The input Swagger definition file     |
-| theme       | string | `'default'`   | Theme name to load for rendering      |
+| Option      | Type    | Default       | Description                           |
+| ----------- | ------- | ------------- | ------------------------------------- |
+| input       | string  |               | The input Swagger definition file     |
+| theme       | string  | `'default'`   | Theme name to load for rendering      |
+| noMinify    | boolean | `false`       | If false, does not minify output      |
 
 In addition, the [default theme](https://github.com/danielgtaylor/aglio/tree/olio-theme) provides the following options:
 
