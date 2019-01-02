@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/psastras/swagger2aglio#readme",
   "dependencies": {
-    "aglio": "^2.2.1",
+    "aglio": "^2.3.0",
     "colors": "^1.1.2",
     "commander": "^2.9.0",
     "html-minifier": "^3.0.1",
