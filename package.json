@@ -36,7 +36,7 @@
     "colors": "^1.1.2",
     "commander": "^2.9.0",
     "html-minifier": "^3.0.1",
-    "json-schema-ref-parser": "^3.1.2",
+    "json-schema-ref-parser": "^4.0.2",
     "prettyjson": "^1.1.3",
     "swag2blue": "^1.0.1"
   },
