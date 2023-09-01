@@ -39,6 +39,11 @@
     conventional-changelog "0.0.17"
     github-url-from-git "^1.4.0"
 
+"@snyk/protect@^1.1209.0":
+  version "1.1209.0"
+  resolved "https://registry.yarnpkg.com/@snyk/protect/-/protect-1.1209.0.tgz#9e938362cf684576ead289916274cf8bd5f4e0ce"
+  integrity sha512-E370Imyh7tnkgaYJdjL+Skb7thgcPcSiIISbUhA6/ZtjKGzGLveLXGAjID9nQlizoO+P+D3UfssnE16GJZjWPw==
+
 abbrev@1, abbrev@1.0.x:
   version "1.0.9"
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-1.0.9.tgz#91b4792588a7738c25f35dd6f63752a2f8776135"
@@ -1962,6 +1967,7 @@ jade@^1.8.2:
     jstransformer "0.0.2"
     mkdirp "~0.5.0"
     transformers "2.1.0"
+    uglify-js "^2.4.19"
     void-elements "~2.0.1"
     with "~4.0.0"
 
